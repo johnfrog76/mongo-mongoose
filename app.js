@@ -1,12 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-// const mongoPractice = require('./mongo');
-const mongoPractice = require('./mongoose');
+const productRoutes = require('./routes/product-routes');
 const HttpError = require('./models/http-error');
 
 const app = express();
+
+app.use(bodyParser.json());
 
 // CORS Headers => Required for cross-origin/ cross-server communication
 app.use((req, res, next) => {
@@ -22,11 +24,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(bodyParser.json());
-
-app.post('/products', mongoPractice.createProduct);
-
-app.get('/products', mongoPractice.getProducts);
+app.use('/api/products', productRoutes);
 
 app.use((req, res, next) => {
     const error = new HttpError('Could not find this route.', 404);
@@ -41,5 +39,14 @@ app.use((error, req, res, next) => {
     res.json({ message: error.message || 'An unknown error occurred!' });
 });
 
-// console.log('port is: ' + process.env.PORT)
-app.listen(process.env.PORT || 5000);
+const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.dnlkt.mongodb.net/${
+    process.env.DBNAME}?retryWrites=true&w=majority`;
+
+  mongoose.connect(url, { useNewUrlParser: true })
+    .then(() => {
+      app.listen(process.env.PORT || 5000);
+      console.log('database connected!')
+    })
+    .catch(err => {
+      console.log(err);
+    });
