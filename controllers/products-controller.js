@@ -84,7 +84,7 @@ const getProducts = async (req, res, next) => {
 };
 
 const updateProduct = async (req, res, next) => {
-    const { onsale, price } = req.body;
+    const { onsale, price, name } = req.body;
     const productId = req.params.pid;
 
     let product;
@@ -100,6 +100,7 @@ const updateProduct = async (req, res, next) => {
 
     product.onsale = onsale;
     product.price = price;
+    product.name = name;
 
     try {
       await product.save();
